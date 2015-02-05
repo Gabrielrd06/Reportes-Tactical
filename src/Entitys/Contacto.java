@@ -35,12 +35,9 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "Contacto.findAll", query = "SELECT c FROM Contacto c"),
     @NamedQuery(name = "Contacto.findByIdContacto", query = "SELECT c FROM Contacto c WHERE c.idContacto = :idContacto"),
     @NamedQuery(name = "Contacto.findByNombre", query = "SELECT c FROM Contacto c WHERE c.nombre = :nombre"),
-    @NamedQuery(name = "Contacto.findByTelFijo", query = "SELECT c FROM Contacto c WHERE c.telFijo = :telFijo"),
-    @NamedQuery(name = "Contacto.findByCelMovistar", query = "SELECT c FROM Contacto c WHERE c.celMovistar = :celMovistar"),
-    @NamedQuery(name = "Contacto.findByCelClaro", query = "SELECT c FROM Contacto c WHERE c.celClaro = :celClaro"),
-    @NamedQuery(name = "Contacto.findByCelNextel", query = "SELECT c FROM Contacto c WHERE c.celNextel = :celNextel"),
-    @NamedQuery(name = "Contacto.findByEmail", query = "SELECT c FROM Contacto c WHERE c.email = :email"),
-    @NamedQuery(name = "Contacto.findByProveedor", query = "SELECT c FROM Contacto c WHERE c.idProveedor = :proveedor")})
+    @NamedQuery(name = "Contacto.findByTelefonofijo", query = "SELECT c FROM Contacto c WHERE c.telefonofijo = :telefonofijo"),
+    @NamedQuery(name = "Contacto.findByCelular", query = "SELECT c FROM Contacto c WHERE c.celular = :celular"),
+    @NamedQuery(name = "Contacto.findByEmail", query = "SELECT c FROM Contacto c WHERE c.email = :email")})
 public class Contacto implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -51,15 +48,10 @@ public class Contacto implements Serializable {
     @Basic(optional = false)
     @Column(name = "nombre")
     private String nombre;
-    @Column(name = "tel_fijo")
-    private String telFijo;
-    @Column(name = "cel_movistar")
-    private String celMovistar;
-    @Column(name = "cel_claro")
-    private String celClaro;
-    @Column(name = "cel_nextel")
-    private String celNextel;
-    @Basic(optional = false)
+    @Column(name = "telefonofijo")
+    private String telefonofijo;
+    @Column(name = "celular")
+    private String celular;
     @Column(name = "email")
     private String email;
     @JoinColumn(name = "idProveedor", referencedColumnName = "idProveedor")
@@ -75,10 +67,9 @@ public class Contacto implements Serializable {
         this.idContacto = idContacto;
     }
 
-    public Contacto(Integer idContacto, String nombre, String email) {
+    public Contacto(Integer idContacto, String nombre) {
         this.idContacto = idContacto;
         this.nombre = nombre;
-        this.email = email;
     }
 
     public Integer getIdContacto() {
@@ -97,36 +88,20 @@ public class Contacto implements Serializable {
         this.nombre = nombre;
     }
 
-    public String getTelFijo() {
-        return telFijo;
+    public String getTelefonofijo() {
+        return telefonofijo;
     }
 
-    public void setTelFijo(String telFijo) {
-        this.telFijo = telFijo;
+    public void setTelefonofijo(String telefonofijo) {
+        this.telefonofijo = telefonofijo;
     }
 
-    public String getCelMovistar() {
-        return celMovistar;
+    public String getCelular() {
+        return celular;
     }
 
-    public void setCelMovistar(String celMovistar) {
-        this.celMovistar = celMovistar;
-    }
-
-    public String getCelClaro() {
-        return celClaro;
-    }
-
-    public void setCelClaro(String celClaro) {
-        this.celClaro = celClaro;
-    }
-
-    public String getCelNextel() {
-        return celNextel;
-    }
-
-    public void setCelNextel(String celNextel) {
-        this.celNextel = celNextel;
+    public void setCelular(String celular) {
+        this.celular = celular;
     }
 
     public String getEmail() {

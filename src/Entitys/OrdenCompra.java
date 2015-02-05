@@ -46,8 +46,7 @@ import javax.xml.bind.annotation.XmlTransient;
     @NamedQuery(name = "OrdenCompra.findByCondicionPago", query = "SELECT o FROM OrdenCompra o WHERE o.condicionPago = :condicionPago"),
     @NamedQuery(name = "OrdenCompra.findByComprobantePago", query = "SELECT o FROM OrdenCompra o WHERE o.comprobantePago = :comprobantePago"),
     @NamedQuery(name = "OrdenCompra.findByMoneda", query = "SELECT o FROM OrdenCompra o WHERE o.moneda = :moneda"),
-    @NamedQuery(name = "OrdenCompra.findByGarantia", query = "SELECT o FROM OrdenCompra o WHERE o.garantia = :garantia"),
-    @NamedQuery(name = "OrdenCompra.findByUltimoRegistro", query = "SELECT o FROM OrdenCompra o ORDER BY o.idOrdenCompra DESC")})
+    @NamedQuery(name = "OrdenCompra.findByGarantia", query = "SELECT o FROM OrdenCompra o WHERE o.garantia = :garantia")})
 public class OrdenCompra implements Serializable {
     private static final long serialVersionUID = 1L;
     @Id
@@ -60,16 +59,16 @@ public class OrdenCompra implements Serializable {
     private String numeroOrden;
     @Basic(optional = false)
     @Column(name = "fecha_solicitud")
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.DATE)
     private Date fechaSolicitud;
     @Column(name = "fecha_procenvio")
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.DATE)
     private Date fechaProcenvio;
     @Column(name = "fecha_entrega")
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.DATE)
     private Date fechaEntrega;
     @Column(name = "fecha_recepcion")
-    @Temporal(TemporalType.TIMESTAMP)
+    @Temporal(TemporalType.DATE)
     private Date fechaRecepcion;
     @Column(name = "referencia_compra")
     private String referenciaCompra;
