@@ -16,7 +16,6 @@ import Entitys.Trabajador;
 import Entitys.Usuario;
 import java.util.List;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 
 /**
  *
@@ -166,7 +165,7 @@ public class UsuarioJpaController implements Serializable {
     }
     
     public List<Usuario> buscarXNombre(String nombre) {        
-        Query query = JpaUtil.getEntityManager().createNamedQuery("Usuario.findByUsuario");
+        Query query = JpaUtil.getEntityManager().createQuery("SELECT u FROM Usuario u WHERE u.usuario = :usuario");
         query.setParameter("usuario", nombre);
         return query.getResultList();
     }

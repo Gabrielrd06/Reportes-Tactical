@@ -14,14 +14,13 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import Entitys.Trabajador;
-import Entitys.Proyecto;
 import Entitys.Contacto;
+import Entitys.Proyecto;
 import Entitys.DetalleOrden;
 import Entitys.OrdenCompra;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 
 /**
  *
@@ -55,15 +54,15 @@ public class OrdenCompraJpaController implements Serializable {
                 idSolicitante = em.getReference(idSolicitante.getClass(), idSolicitante.getIdTrabajador());
                 ordenCompra.setIdSolicitante(idSolicitante);
             }
-            Proyecto idProyecto = ordenCompra.getIdProyecto();
-            if (idProyecto != null) {
-                idProyecto = em.getReference(idProyecto.getClass(), idProyecto.getIdProyecto());
-                ordenCompra.setIdProyecto(idProyecto);
-            }
             Contacto idContacto = ordenCompra.getIdContacto();
             if (idContacto != null) {
                 idContacto = em.getReference(idContacto.getClass(), idContacto.getIdContacto());
                 ordenCompra.setIdContacto(idContacto);
+            }
+            Proyecto idProyecto = ordenCompra.getIdProyecto();
+            if (idProyecto != null) {
+                idProyecto = em.getReference(idProyecto.getClass(), idProyecto.getIdProyecto());
+                ordenCompra.setIdProyecto(idProyecto);
             }
             List<DetalleOrden> attachedDetalleOrdenList = new ArrayList<DetalleOrden>();
             for (DetalleOrden detalleOrdenListDetalleOrdenToAttach : ordenCompra.getDetalleOrdenList()) {
@@ -80,13 +79,13 @@ public class OrdenCompraJpaController implements Serializable {
                 idSolicitante.getOrdenCompraList().add(ordenCompra);
                 idSolicitante = em.merge(idSolicitante);
             }
-            if (idProyecto != null) {
-                idProyecto.getOrdenCompraList().add(ordenCompra);
-                idProyecto = em.merge(idProyecto);
-            }
             if (idContacto != null) {
                 idContacto.getOrdenCompraList().add(ordenCompra);
                 idContacto = em.merge(idContacto);
+            }
+            if (idProyecto != null) {
+                idProyecto.getOrdenCompraList().add(ordenCompra);
+                idProyecto = em.merge(idProyecto);
             }
             for (DetalleOrden detalleOrdenListDetalleOrden : ordenCompra.getDetalleOrdenList()) {
                 OrdenCompra oldIdOrdenCompraOfDetalleOrdenListDetalleOrden = detalleOrdenListDetalleOrden.getIdOrdenCompra();
@@ -115,10 +114,10 @@ public class OrdenCompraJpaController implements Serializable {
             Trabajador idElaboradorNew = ordenCompra.getIdElaborador();
             Trabajador idSolicitanteOld = persistentOrdenCompra.getIdSolicitante();
             Trabajador idSolicitanteNew = ordenCompra.getIdSolicitante();
-            Proyecto idProyectoOld = persistentOrdenCompra.getIdProyecto();
-            Proyecto idProyectoNew = ordenCompra.getIdProyecto();
             Contacto idContactoOld = persistentOrdenCompra.getIdContacto();
             Contacto idContactoNew = ordenCompra.getIdContacto();
+            Proyecto idProyectoOld = persistentOrdenCompra.getIdProyecto();
+            Proyecto idProyectoNew = ordenCompra.getIdProyecto();
             List<DetalleOrden> detalleOrdenListOld = persistentOrdenCompra.getDetalleOrdenList();
             List<DetalleOrden> detalleOrdenListNew = ordenCompra.getDetalleOrdenList();
             List<String> illegalOrphanMessages = null;
@@ -141,13 +140,13 @@ public class OrdenCompraJpaController implements Serializable {
                 idSolicitanteNew = em.getReference(idSolicitanteNew.getClass(), idSolicitanteNew.getIdTrabajador());
                 ordenCompra.setIdSolicitante(idSolicitanteNew);
             }
-            if (idProyectoNew != null) {
-                idProyectoNew = em.getReference(idProyectoNew.getClass(), idProyectoNew.getIdProyecto());
-                ordenCompra.setIdProyecto(idProyectoNew);
-            }
             if (idContactoNew != null) {
                 idContactoNew = em.getReference(idContactoNew.getClass(), idContactoNew.getIdContacto());
                 ordenCompra.setIdContacto(idContactoNew);
+            }
+            if (idProyectoNew != null) {
+                idProyectoNew = em.getReference(idProyectoNew.getClass(), idProyectoNew.getIdProyecto());
+                ordenCompra.setIdProyecto(idProyectoNew);
             }
             List<DetalleOrden> attachedDetalleOrdenListNew = new ArrayList<DetalleOrden>();
             for (DetalleOrden detalleOrdenListNewDetalleOrdenToAttach : detalleOrdenListNew) {
@@ -173,14 +172,6 @@ public class OrdenCompraJpaController implements Serializable {
                 idSolicitanteNew.getOrdenCompraList().add(ordenCompra);
                 idSolicitanteNew = em.merge(idSolicitanteNew);
             }
-            if (idProyectoOld != null && !idProyectoOld.equals(idProyectoNew)) {
-                idProyectoOld.getOrdenCompraList().remove(ordenCompra);
-                idProyectoOld = em.merge(idProyectoOld);
-            }
-            if (idProyectoNew != null && !idProyectoNew.equals(idProyectoOld)) {
-                idProyectoNew.getOrdenCompraList().add(ordenCompra);
-                idProyectoNew = em.merge(idProyectoNew);
-            }
             if (idContactoOld != null && !idContactoOld.equals(idContactoNew)) {
                 idContactoOld.getOrdenCompraList().remove(ordenCompra);
                 idContactoOld = em.merge(idContactoOld);
@@ -188,6 +179,14 @@ public class OrdenCompraJpaController implements Serializable {
             if (idContactoNew != null && !idContactoNew.equals(idContactoOld)) {
                 idContactoNew.getOrdenCompraList().add(ordenCompra);
                 idContactoNew = em.merge(idContactoNew);
+            }
+            if (idProyectoOld != null && !idProyectoOld.equals(idProyectoNew)) {
+                idProyectoOld.getOrdenCompraList().remove(ordenCompra);
+                idProyectoOld = em.merge(idProyectoOld);
+            }
+            if (idProyectoNew != null && !idProyectoNew.equals(idProyectoOld)) {
+                idProyectoNew.getOrdenCompraList().add(ordenCompra);
+                idProyectoNew = em.merge(idProyectoNew);
             }
             for (DetalleOrden detalleOrdenListNewDetalleOrden : detalleOrdenListNew) {
                 if (!detalleOrdenListOld.contains(detalleOrdenListNewDetalleOrden)) {
@@ -250,15 +249,15 @@ public class OrdenCompraJpaController implements Serializable {
                 idSolicitante.getOrdenCompraList().remove(ordenCompra);
                 idSolicitante = em.merge(idSolicitante);
             }
-            Proyecto idProyecto = ordenCompra.getIdProyecto();
-            if (idProyecto != null) {
-                idProyecto.getOrdenCompraList().remove(ordenCompra);
-                idProyecto = em.merge(idProyecto);
-            }
             Contacto idContacto = ordenCompra.getIdContacto();
             if (idContacto != null) {
                 idContacto.getOrdenCompraList().remove(ordenCompra);
                 idContacto = em.merge(idContacto);
+            }
+            Proyecto idProyecto = ordenCompra.getIdProyecto();
+            if (idProyecto != null) {
+                idProyecto.getOrdenCompraList().remove(ordenCompra);
+                idProyecto = em.merge(idProyecto);
             }
             em.remove(ordenCompra);
             em.getTransaction().commit();
@@ -316,20 +315,20 @@ public class OrdenCompraJpaController implements Serializable {
     }
     
     public List<OrdenCompra> buscarUltimoRegistro() {        
-        Query query = JpaUtil.getEntityManager().createNamedQuery("OrdenCompra.findByUltimoRegistro");        
+        Query query = JpaUtil.getEntityManager().createQuery("SELECT o FROM OrdenCompra o ORDER BY o.idOrdenCompra DESC");
         return query.getResultList();
     }
      
-    public List<OrdenCompra> buscarxNumOrdenCompra(String fecha) { //busca ordenes por el año actual        
-        Query query = JpaUtil.getEntityManager().createNamedQuery("OrdenCompra.findByNumeroOrden");   
+    public List<OrdenCompra> buscarxNumOrdenCompra(String fecha) {        
+        Query query = JpaUtil.getEntityManager().createQuery("SELECT o FROM OrdenCompra o WHERE o.numeroOrden LIKE :numeroOrden ORDER BY o.numeroOrden DESC");
         query.setParameter("numeroOrden","%"+fecha+"%");
         return query.getResultList();
     } 
     
-    public List<OrdenCompra> buscarxOrdenCompra(String numOrden) {        
-        Query query = JpaUtil.getEntityManager().createNamedQuery("SELECT o FROM OrdenCompra o WHERE o.numeroOrden = :numeroOrden");   
-        query.setParameter("numeroOrden","%"+numOrden+"%");
+    public List<OrdenCompra> buscarXContacto(Contacto contacto) {      
+        Query query = JpaUtil.getEntityManager().createQuery("SELECT o FROM OrdenCompra o WHERE o.idContacto = :contacto");
+        query.setParameter("contacto",contacto);
         return query.getResultList();
-    } 
+    }
     
 }

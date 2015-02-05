@@ -33,7 +33,6 @@ public class ProveedorJpaController implements Serializable {
         return JpaUtil.getEntityManager();
     }
 
-
     public void create(Proveedor proveedor) {
         if (proveedor.getContactoList() == null) {
             proveedor.setContactoList(new ArrayList<Contacto>());
@@ -198,6 +197,18 @@ public class ProveedorJpaController implements Serializable {
         } finally {
             em.close();
         }
+    }
+    
+    public List<Proveedor> buscarXruc(String descripcion) {      
+        Query query = JpaUtil.getEntityManager().createQuery("SELECT p FROM Proveedor p WHERE p.ruc LIKE :ruc");
+        query.setParameter("ruc","%"+descripcion+"%");
+        return query.getResultList();
+    }
+    
+     public List<Proveedor> buscarXrazonsocial(String descripcion) {      
+        Query query = JpaUtil.getEntityManager().createQuery("SELECT p FROM Proveedor p WHERE p.razonsocial LIKE :razonsocial");
+        query.setParameter("razonsocial","%"+descripcion+"%");
+        return query.getResultList();
     }
     
 }

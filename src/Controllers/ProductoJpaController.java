@@ -6,7 +6,6 @@
 
 package Controllers;
 
-import Controllers.exceptions.IllegalOrphanException;
 import Controllers.exceptions.NonexistentEntityException;
 import java.io.Serializable;
 import javax.persistence.Query;
@@ -14,12 +13,9 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import Entitys.Marca;
-import Entitys.DetalleOrden;
 import Entitys.Producto;
-import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 
 /**
  *
@@ -35,10 +31,8 @@ public class ProductoJpaController implements Serializable {
         return JpaUtil.getEntityManager();
     }
 
+
     public void create(Producto producto) {
-        if (producto.getDetalleOrdenList() == null) {
-            producto.setDetalleOrdenList(new ArrayList<DetalleOrden>());
-        }
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -48,25 +42,10 @@ public class ProductoJpaController implements Serializable {
                 idMarca = em.getReference(idMarca.getClass(), idMarca.getIdMarca());
                 producto.setIdMarca(idMarca);
             }
-            List<DetalleOrden> attachedDetalleOrdenList = new ArrayList<DetalleOrden>();
-            for (DetalleOrden detalleOrdenListDetalleOrdenToAttach : producto.getDetalleOrdenList()) {
-                detalleOrdenListDetalleOrdenToAttach = em.getReference(detalleOrdenListDetalleOrdenToAttach.getClass(), detalleOrdenListDetalleOrdenToAttach.getIdDetalleOrden());
-                attachedDetalleOrdenList.add(detalleOrdenListDetalleOrdenToAttach);
-            }
-            producto.setDetalleOrdenList(attachedDetalleOrdenList);
             em.persist(producto);
             if (idMarca != null) {
                 idMarca.getProductoList().add(producto);
                 idMarca = em.merge(idMarca);
-            }
-            for (DetalleOrden detalleOrdenListDetalleOrden : producto.getDetalleOrdenList()) {
-                Producto oldIdProductoOfDetalleOrdenListDetalleOrden = detalleOrdenListDetalleOrden.getIdProducto();
-                detalleOrdenListDetalleOrden.setIdProducto(producto);
-                detalleOrdenListDetalleOrden = em.merge(detalleOrdenListDetalleOrden);
-                if (oldIdProductoOfDetalleOrdenListDetalleOrden != null) {
-                    oldIdProductoOfDetalleOrdenListDetalleOrden.getDetalleOrdenList().remove(detalleOrdenListDetalleOrden);
-                    oldIdProductoOfDetalleOrdenListDetalleOrden = em.merge(oldIdProductoOfDetalleOrdenListDetalleOrden);
-                }
             }
             em.getTransaction().commit();
         } finally {
@@ -76,7 +55,7 @@ public class ProductoJpaController implements Serializable {
         }
     }
 
-    public void edit(Producto producto) throws IllegalOrphanException, NonexistentEntityException, Exception {
+    public void edit(Producto producto) throws NonexistentEntityException, Exception {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -84,31 +63,10 @@ public class ProductoJpaController implements Serializable {
             Producto persistentProducto = em.find(Producto.class, producto.getIdProducto());
             Marca idMarcaOld = persistentProducto.getIdMarca();
             Marca idMarcaNew = producto.getIdMarca();
-            List<DetalleOrden> detalleOrdenListOld = persistentProducto.getDetalleOrdenList();
-            List<DetalleOrden> detalleOrdenListNew = producto.getDetalleOrdenList();
-            List<String> illegalOrphanMessages = null;
-            for (DetalleOrden detalleOrdenListOldDetalleOrden : detalleOrdenListOld) {
-                if (!detalleOrdenListNew.contains(detalleOrdenListOldDetalleOrden)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
-                    }
-                    illegalOrphanMessages.add("You must retain DetalleOrden " + detalleOrdenListOldDetalleOrden + " since its idProducto field is not nullable.");
-                }
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
-            }
             if (idMarcaNew != null) {
                 idMarcaNew = em.getReference(idMarcaNew.getClass(), idMarcaNew.getIdMarca());
                 producto.setIdMarca(idMarcaNew);
             }
-            List<DetalleOrden> attachedDetalleOrdenListNew = new ArrayList<DetalleOrden>();
-            for (DetalleOrden detalleOrdenListNewDetalleOrdenToAttach : detalleOrdenListNew) {
-                detalleOrdenListNewDetalleOrdenToAttach = em.getReference(detalleOrdenListNewDetalleOrdenToAttach.getClass(), detalleOrdenListNewDetalleOrdenToAttach.getIdDetalleOrden());
-                attachedDetalleOrdenListNew.add(detalleOrdenListNewDetalleOrdenToAttach);
-            }
-            detalleOrdenListNew = attachedDetalleOrdenListNew;
-            producto.setDetalleOrdenList(detalleOrdenListNew);
             producto = em.merge(producto);
             if (idMarcaOld != null && !idMarcaOld.equals(idMarcaNew)) {
                 idMarcaOld.getProductoList().remove(producto);
@@ -117,17 +75,6 @@ public class ProductoJpaController implements Serializable {
             if (idMarcaNew != null && !idMarcaNew.equals(idMarcaOld)) {
                 idMarcaNew.getProductoList().add(producto);
                 idMarcaNew = em.merge(idMarcaNew);
-            }
-            for (DetalleOrden detalleOrdenListNewDetalleOrden : detalleOrdenListNew) {
-                if (!detalleOrdenListOld.contains(detalleOrdenListNewDetalleOrden)) {
-                    Producto oldIdProductoOfDetalleOrdenListNewDetalleOrden = detalleOrdenListNewDetalleOrden.getIdProducto();
-                    detalleOrdenListNewDetalleOrden.setIdProducto(producto);
-                    detalleOrdenListNewDetalleOrden = em.merge(detalleOrdenListNewDetalleOrden);
-                    if (oldIdProductoOfDetalleOrdenListNewDetalleOrden != null && !oldIdProductoOfDetalleOrdenListNewDetalleOrden.equals(producto)) {
-                        oldIdProductoOfDetalleOrdenListNewDetalleOrden.getDetalleOrdenList().remove(detalleOrdenListNewDetalleOrden);
-                        oldIdProductoOfDetalleOrdenListNewDetalleOrden = em.merge(oldIdProductoOfDetalleOrdenListNewDetalleOrden);
-                    }
-                }
             }
             em.getTransaction().commit();
         } catch (Exception ex) {
@@ -146,7 +93,7 @@ public class ProductoJpaController implements Serializable {
         }
     }
 
-    public void destroy(Integer id) throws IllegalOrphanException, NonexistentEntityException {
+    public void destroy(Integer id) throws NonexistentEntityException {
         EntityManager em = null;
         try {
             em = getEntityManager();
@@ -157,17 +104,6 @@ public class ProductoJpaController implements Serializable {
                 producto.getIdProducto();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The producto with id " + id + " no longer exists.", enfe);
-            }
-            List<String> illegalOrphanMessages = null;
-            List<DetalleOrden> detalleOrdenListOrphanCheck = producto.getDetalleOrdenList();
-            for (DetalleOrden detalleOrdenListOrphanCheckDetalleOrden : detalleOrdenListOrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
-                }
-                illegalOrphanMessages.add("This Producto (" + producto + ") cannot be destroyed since the DetalleOrden " + detalleOrdenListOrphanCheckDetalleOrden + " in its detalleOrdenList field has a non-nullable idProducto field.");
-            }
-            if (illegalOrphanMessages != null) {
-                throw new IllegalOrphanException(illegalOrphanMessages);
             }
             Marca idMarca = producto.getIdMarca();
             if (idMarca != null) {
@@ -230,14 +166,14 @@ public class ProductoJpaController implements Serializable {
     }
     
     public List<Producto> buscarXMarca(Marca marca) {      
-        Query query = JpaUtil.getEntityManager().createNamedQuery("Producto.findByMarca");
+        Query query = JpaUtil.getEntityManager().createQuery("SELECT p FROM Producto p WHERE p.idMarca = :marca");
         query.setParameter("marca",marca);
         return query.getResultList();
     }
     
-     public List<Producto> buscarXDescripcion(String descripcion) {      
-        Query query = JpaUtil.getEntityManager().createNamedQuery("Producto.findByDescripcion");
-        query.setParameter("descripcion","%"+descripcion+"%");
+    public List<Producto> buscarXDescripcion(String descripcion) {      
+        Query query = JpaUtil.getEntityManager().createQuery("SELECT p FROM Producto p WHERE p.descripcion LIKE CONCAT('%',:descripcion,'%')");
+        query.setParameter("descripcion",descripcion);
         return query.getResultList();
     }
     

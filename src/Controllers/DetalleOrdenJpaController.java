@@ -13,7 +13,6 @@ import javax.persistence.Query;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
-import Entitys.Producto;
 import Entitys.OrdenCompra;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -37,21 +36,12 @@ public class DetalleOrdenJpaController implements Serializable {
         try {
             em = getEntityManager();
             em.getTransaction().begin();
-            Producto idProducto = detalleOrden.getIdProducto();
-            if (idProducto != null) {
-                idProducto = em.getReference(idProducto.getClass(), idProducto.getIdProducto());
-                detalleOrden.setIdProducto(idProducto);
-            }
             OrdenCompra idOrdenCompra = detalleOrden.getIdOrdenCompra();
             if (idOrdenCompra != null) {
                 idOrdenCompra = em.getReference(idOrdenCompra.getClass(), idOrdenCompra.getIdOrdenCompra());
                 detalleOrden.setIdOrdenCompra(idOrdenCompra);
             }
             em.persist(detalleOrden);
-            if (idProducto != null) {
-                idProducto.getDetalleOrdenList().add(detalleOrden);
-                idProducto = em.merge(idProducto);
-            }
             if (idOrdenCompra != null) {
                 idOrdenCompra.getDetalleOrdenList().add(detalleOrden);
                 idOrdenCompra = em.merge(idOrdenCompra);
@@ -70,27 +60,13 @@ public class DetalleOrdenJpaController implements Serializable {
             em = getEntityManager();
             em.getTransaction().begin();
             DetalleOrden persistentDetalleOrden = em.find(DetalleOrden.class, detalleOrden.getIdDetalleOrden());
-            Producto idProductoOld = persistentDetalleOrden.getIdProducto();
-            Producto idProductoNew = detalleOrden.getIdProducto();
             OrdenCompra idOrdenCompraOld = persistentDetalleOrden.getIdOrdenCompra();
             OrdenCompra idOrdenCompraNew = detalleOrden.getIdOrdenCompra();
-            if (idProductoNew != null) {
-                idProductoNew = em.getReference(idProductoNew.getClass(), idProductoNew.getIdProducto());
-                detalleOrden.setIdProducto(idProductoNew);
-            }
             if (idOrdenCompraNew != null) {
                 idOrdenCompraNew = em.getReference(idOrdenCompraNew.getClass(), idOrdenCompraNew.getIdOrdenCompra());
                 detalleOrden.setIdOrdenCompra(idOrdenCompraNew);
             }
             detalleOrden = em.merge(detalleOrden);
-            if (idProductoOld != null && !idProductoOld.equals(idProductoNew)) {
-                idProductoOld.getDetalleOrdenList().remove(detalleOrden);
-                idProductoOld = em.merge(idProductoOld);
-            }
-            if (idProductoNew != null && !idProductoNew.equals(idProductoOld)) {
-                idProductoNew.getDetalleOrdenList().add(detalleOrden);
-                idProductoNew = em.merge(idProductoNew);
-            }
             if (idOrdenCompraOld != null && !idOrdenCompraOld.equals(idOrdenCompraNew)) {
                 idOrdenCompraOld.getDetalleOrdenList().remove(detalleOrden);
                 idOrdenCompraOld = em.merge(idOrdenCompraOld);
@@ -127,11 +103,6 @@ public class DetalleOrdenJpaController implements Serializable {
                 detalleOrden.getIdDetalleOrden();
             } catch (EntityNotFoundException enfe) {
                 throw new NonexistentEntityException("The detalleOrden with id " + id + " no longer exists.", enfe);
-            }
-            Producto idProducto = detalleOrden.getIdProducto();
-            if (idProducto != null) {
-                idProducto.getDetalleOrdenList().remove(detalleOrden);
-                idProducto = em.merge(idProducto);
             }
             OrdenCompra idOrdenCompra = detalleOrden.getIdOrdenCompra();
             if (idOrdenCompra != null) {
@@ -194,7 +165,7 @@ public class DetalleOrdenJpaController implements Serializable {
     }
     
     public List<DetalleOrden> buscarXOrden(OrdenCompra ordenCompra) {      
-        Query query = JpaUtil.getEntityManager().createNamedQuery("DetalleOrden.findByOrden");
+        Query query = JpaUtil.getEntityManager().createQuery("SELECT d FROM DetalleOrden d WHERE d.idOrdenCompra = :ordenCompra");
         query.setParameter("ordenCompra",ordenCompra);
         return query.getResultList();
     }

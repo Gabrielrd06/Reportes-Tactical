@@ -19,7 +19,6 @@ import Entitys.OrdenCompra;
 import java.util.ArrayList;
 import java.util.List;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 
 /**
  *
@@ -230,10 +229,15 @@ public class ContactoJpaController implements Serializable {
     }
     
     public List<Contacto> buscarXProveedor(Proveedor proveedor) {      
-        Query query = JpaUtil.getEntityManager().createNamedQuery("Contacto.findByProveedor");
+        Query query = JpaUtil.getEntityManager().createQuery("SELECT c FROM Contacto c WHERE c.idProveedor = :proveedor");
         query.setParameter("proveedor",proveedor);
         return query.getResultList();
     }
     
+     public List<Contacto> buscarXNombre(String Nombre) {      
+        Query query = JpaUtil.getEntityManager().createQuery("SELECT c FROM Contacto c WHERE c.nombre LIKE CONCAT('%',:nombre,'%')");
+        query.setParameter("nombre",Nombre);
+        return query.getResultList();
+    }
     
 }

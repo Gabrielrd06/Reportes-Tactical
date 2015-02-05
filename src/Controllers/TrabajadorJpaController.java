@@ -14,13 +14,12 @@ import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Root;
 import Entitys.Area;
-import Entitys.Usuario;
-import java.util.ArrayList;
-import java.util.List;
 import Entitys.OrdenCompra;
 import Entitys.Trabajador;
+import java.util.ArrayList;
+import java.util.List;
+import Entitys.Usuario;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 
 /**
  *
@@ -36,16 +35,15 @@ public class TrabajadorJpaController implements Serializable {
         return JpaUtil.getEntityManager();
     }
 
-
     public void create(Trabajador trabajador) {
-        if (trabajador.getUsuarioList() == null) {
-            trabajador.setUsuarioList(new ArrayList<Usuario>());
-        }
         if (trabajador.getOrdenCompraList() == null) {
             trabajador.setOrdenCompraList(new ArrayList<OrdenCompra>());
         }
         if (trabajador.getOrdenCompraList1() == null) {
             trabajador.setOrdenCompraList1(new ArrayList<OrdenCompra>());
+        }
+        if (trabajador.getUsuarioList() == null) {
+            trabajador.setUsuarioList(new ArrayList<Usuario>());
         }
         EntityManager em = null;
         try {
@@ -56,12 +54,6 @@ public class TrabajadorJpaController implements Serializable {
                 idArea = em.getReference(idArea.getClass(), idArea.getIdArea());
                 trabajador.setIdArea(idArea);
             }
-            List<Usuario> attachedUsuarioList = new ArrayList<Usuario>();
-            for (Usuario usuarioListUsuarioToAttach : trabajador.getUsuarioList()) {
-                usuarioListUsuarioToAttach = em.getReference(usuarioListUsuarioToAttach.getClass(), usuarioListUsuarioToAttach.getIdUsuario());
-                attachedUsuarioList.add(usuarioListUsuarioToAttach);
-            }
-            trabajador.setUsuarioList(attachedUsuarioList);
             List<OrdenCompra> attachedOrdenCompraList = new ArrayList<OrdenCompra>();
             for (OrdenCompra ordenCompraListOrdenCompraToAttach : trabajador.getOrdenCompraList()) {
                 ordenCompraListOrdenCompraToAttach = em.getReference(ordenCompraListOrdenCompraToAttach.getClass(), ordenCompraListOrdenCompraToAttach.getIdOrdenCompra());
@@ -74,19 +66,16 @@ public class TrabajadorJpaController implements Serializable {
                 attachedOrdenCompraList1.add(ordenCompraList1OrdenCompraToAttach);
             }
             trabajador.setOrdenCompraList1(attachedOrdenCompraList1);
+            List<Usuario> attachedUsuarioList = new ArrayList<Usuario>();
+            for (Usuario usuarioListUsuarioToAttach : trabajador.getUsuarioList()) {
+                usuarioListUsuarioToAttach = em.getReference(usuarioListUsuarioToAttach.getClass(), usuarioListUsuarioToAttach.getIdUsuario());
+                attachedUsuarioList.add(usuarioListUsuarioToAttach);
+            }
+            trabajador.setUsuarioList(attachedUsuarioList);
             em.persist(trabajador);
             if (idArea != null) {
                 idArea.getTrabajadorList().add(trabajador);
                 idArea = em.merge(idArea);
-            }
-            for (Usuario usuarioListUsuario : trabajador.getUsuarioList()) {
-                Trabajador oldIdTrabajadorOfUsuarioListUsuario = usuarioListUsuario.getIdTrabajador();
-                usuarioListUsuario.setIdTrabajador(trabajador);
-                usuarioListUsuario = em.merge(usuarioListUsuario);
-                if (oldIdTrabajadorOfUsuarioListUsuario != null) {
-                    oldIdTrabajadorOfUsuarioListUsuario.getUsuarioList().remove(usuarioListUsuario);
-                    oldIdTrabajadorOfUsuarioListUsuario = em.merge(oldIdTrabajadorOfUsuarioListUsuario);
-                }
             }
             for (OrdenCompra ordenCompraListOrdenCompra : trabajador.getOrdenCompraList()) {
                 Trabajador oldIdElaboradorOfOrdenCompraListOrdenCompra = ordenCompraListOrdenCompra.getIdElaborador();
@@ -106,6 +95,15 @@ public class TrabajadorJpaController implements Serializable {
                     oldIdSolicitanteOfOrdenCompraList1OrdenCompra = em.merge(oldIdSolicitanteOfOrdenCompraList1OrdenCompra);
                 }
             }
+            for (Usuario usuarioListUsuario : trabajador.getUsuarioList()) {
+                Trabajador oldIdTrabajadorOfUsuarioListUsuario = usuarioListUsuario.getIdTrabajador();
+                usuarioListUsuario.setIdTrabajador(trabajador);
+                usuarioListUsuario = em.merge(usuarioListUsuario);
+                if (oldIdTrabajadorOfUsuarioListUsuario != null) {
+                    oldIdTrabajadorOfUsuarioListUsuario.getUsuarioList().remove(usuarioListUsuario);
+                    oldIdTrabajadorOfUsuarioListUsuario = em.merge(oldIdTrabajadorOfUsuarioListUsuario);
+                }
+            }
             em.getTransaction().commit();
         } finally {
             if (em != null) {
@@ -122,21 +120,13 @@ public class TrabajadorJpaController implements Serializable {
             Trabajador persistentTrabajador = em.find(Trabajador.class, trabajador.getIdTrabajador());
             Area idAreaOld = persistentTrabajador.getIdArea();
             Area idAreaNew = trabajador.getIdArea();
-            List<Usuario> usuarioListOld = persistentTrabajador.getUsuarioList();
-            List<Usuario> usuarioListNew = trabajador.getUsuarioList();
             List<OrdenCompra> ordenCompraListOld = persistentTrabajador.getOrdenCompraList();
             List<OrdenCompra> ordenCompraListNew = trabajador.getOrdenCompraList();
             List<OrdenCompra> ordenCompraList1Old = persistentTrabajador.getOrdenCompraList1();
             List<OrdenCompra> ordenCompraList1New = trabajador.getOrdenCompraList1();
+            List<Usuario> usuarioListOld = persistentTrabajador.getUsuarioList();
+            List<Usuario> usuarioListNew = trabajador.getUsuarioList();
             List<String> illegalOrphanMessages = null;
-            for (Usuario usuarioListOldUsuario : usuarioListOld) {
-                if (!usuarioListNew.contains(usuarioListOldUsuario)) {
-                    if (illegalOrphanMessages == null) {
-                        illegalOrphanMessages = new ArrayList<String>();
-                    }
-                    illegalOrphanMessages.add("You must retain Usuario " + usuarioListOldUsuario + " since its idTrabajador field is not nullable.");
-                }
-            }
             for (OrdenCompra ordenCompraListOldOrdenCompra : ordenCompraListOld) {
                 if (!ordenCompraListNew.contains(ordenCompraListOldOrdenCompra)) {
                     if (illegalOrphanMessages == null) {
@@ -153,6 +143,14 @@ public class TrabajadorJpaController implements Serializable {
                     illegalOrphanMessages.add("You must retain OrdenCompra " + ordenCompraList1OldOrdenCompra + " since its idSolicitante field is not nullable.");
                 }
             }
+            for (Usuario usuarioListOldUsuario : usuarioListOld) {
+                if (!usuarioListNew.contains(usuarioListOldUsuario)) {
+                    if (illegalOrphanMessages == null) {
+                        illegalOrphanMessages = new ArrayList<String>();
+                    }
+                    illegalOrphanMessages.add("You must retain Usuario " + usuarioListOldUsuario + " since its idTrabajador field is not nullable.");
+                }
+            }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
             }
@@ -160,13 +158,6 @@ public class TrabajadorJpaController implements Serializable {
                 idAreaNew = em.getReference(idAreaNew.getClass(), idAreaNew.getIdArea());
                 trabajador.setIdArea(idAreaNew);
             }
-            List<Usuario> attachedUsuarioListNew = new ArrayList<Usuario>();
-            for (Usuario usuarioListNewUsuarioToAttach : usuarioListNew) {
-                usuarioListNewUsuarioToAttach = em.getReference(usuarioListNewUsuarioToAttach.getClass(), usuarioListNewUsuarioToAttach.getIdUsuario());
-                attachedUsuarioListNew.add(usuarioListNewUsuarioToAttach);
-            }
-            usuarioListNew = attachedUsuarioListNew;
-            trabajador.setUsuarioList(usuarioListNew);
             List<OrdenCompra> attachedOrdenCompraListNew = new ArrayList<OrdenCompra>();
             for (OrdenCompra ordenCompraListNewOrdenCompraToAttach : ordenCompraListNew) {
                 ordenCompraListNewOrdenCompraToAttach = em.getReference(ordenCompraListNewOrdenCompraToAttach.getClass(), ordenCompraListNewOrdenCompraToAttach.getIdOrdenCompra());
@@ -181,6 +172,13 @@ public class TrabajadorJpaController implements Serializable {
             }
             ordenCompraList1New = attachedOrdenCompraList1New;
             trabajador.setOrdenCompraList1(ordenCompraList1New);
+            List<Usuario> attachedUsuarioListNew = new ArrayList<Usuario>();
+            for (Usuario usuarioListNewUsuarioToAttach : usuarioListNew) {
+                usuarioListNewUsuarioToAttach = em.getReference(usuarioListNewUsuarioToAttach.getClass(), usuarioListNewUsuarioToAttach.getIdUsuario());
+                attachedUsuarioListNew.add(usuarioListNewUsuarioToAttach);
+            }
+            usuarioListNew = attachedUsuarioListNew;
+            trabajador.setUsuarioList(usuarioListNew);
             trabajador = em.merge(trabajador);
             if (idAreaOld != null && !idAreaOld.equals(idAreaNew)) {
                 idAreaOld.getTrabajadorList().remove(trabajador);
@@ -189,17 +187,6 @@ public class TrabajadorJpaController implements Serializable {
             if (idAreaNew != null && !idAreaNew.equals(idAreaOld)) {
                 idAreaNew.getTrabajadorList().add(trabajador);
                 idAreaNew = em.merge(idAreaNew);
-            }
-            for (Usuario usuarioListNewUsuario : usuarioListNew) {
-                if (!usuarioListOld.contains(usuarioListNewUsuario)) {
-                    Trabajador oldIdTrabajadorOfUsuarioListNewUsuario = usuarioListNewUsuario.getIdTrabajador();
-                    usuarioListNewUsuario.setIdTrabajador(trabajador);
-                    usuarioListNewUsuario = em.merge(usuarioListNewUsuario);
-                    if (oldIdTrabajadorOfUsuarioListNewUsuario != null && !oldIdTrabajadorOfUsuarioListNewUsuario.equals(trabajador)) {
-                        oldIdTrabajadorOfUsuarioListNewUsuario.getUsuarioList().remove(usuarioListNewUsuario);
-                        oldIdTrabajadorOfUsuarioListNewUsuario = em.merge(oldIdTrabajadorOfUsuarioListNewUsuario);
-                    }
-                }
             }
             for (OrdenCompra ordenCompraListNewOrdenCompra : ordenCompraListNew) {
                 if (!ordenCompraListOld.contains(ordenCompraListNewOrdenCompra)) {
@@ -220,6 +207,17 @@ public class TrabajadorJpaController implements Serializable {
                     if (oldIdSolicitanteOfOrdenCompraList1NewOrdenCompra != null && !oldIdSolicitanteOfOrdenCompraList1NewOrdenCompra.equals(trabajador)) {
                         oldIdSolicitanteOfOrdenCompraList1NewOrdenCompra.getOrdenCompraList1().remove(ordenCompraList1NewOrdenCompra);
                         oldIdSolicitanteOfOrdenCompraList1NewOrdenCompra = em.merge(oldIdSolicitanteOfOrdenCompraList1NewOrdenCompra);
+                    }
+                }
+            }
+            for (Usuario usuarioListNewUsuario : usuarioListNew) {
+                if (!usuarioListOld.contains(usuarioListNewUsuario)) {
+                    Trabajador oldIdTrabajadorOfUsuarioListNewUsuario = usuarioListNewUsuario.getIdTrabajador();
+                    usuarioListNewUsuario.setIdTrabajador(trabajador);
+                    usuarioListNewUsuario = em.merge(usuarioListNewUsuario);
+                    if (oldIdTrabajadorOfUsuarioListNewUsuario != null && !oldIdTrabajadorOfUsuarioListNewUsuario.equals(trabajador)) {
+                        oldIdTrabajadorOfUsuarioListNewUsuario.getUsuarioList().remove(usuarioListNewUsuario);
+                        oldIdTrabajadorOfUsuarioListNewUsuario = em.merge(oldIdTrabajadorOfUsuarioListNewUsuario);
                     }
                 }
             }
@@ -253,13 +251,6 @@ public class TrabajadorJpaController implements Serializable {
                 throw new NonexistentEntityException("The trabajador with id " + id + " no longer exists.", enfe);
             }
             List<String> illegalOrphanMessages = null;
-            List<Usuario> usuarioListOrphanCheck = trabajador.getUsuarioList();
-            for (Usuario usuarioListOrphanCheckUsuario : usuarioListOrphanCheck) {
-                if (illegalOrphanMessages == null) {
-                    illegalOrphanMessages = new ArrayList<String>();
-                }
-                illegalOrphanMessages.add("This Trabajador (" + trabajador + ") cannot be destroyed since the Usuario " + usuarioListOrphanCheckUsuario + " in its usuarioList field has a non-nullable idTrabajador field.");
-            }
             List<OrdenCompra> ordenCompraListOrphanCheck = trabajador.getOrdenCompraList();
             for (OrdenCompra ordenCompraListOrphanCheckOrdenCompra : ordenCompraListOrphanCheck) {
                 if (illegalOrphanMessages == null) {
@@ -273,6 +264,13 @@ public class TrabajadorJpaController implements Serializable {
                     illegalOrphanMessages = new ArrayList<String>();
                 }
                 illegalOrphanMessages.add("This Trabajador (" + trabajador + ") cannot be destroyed since the OrdenCompra " + ordenCompraList1OrphanCheckOrdenCompra + " in its ordenCompraList1 field has a non-nullable idSolicitante field.");
+            }
+            List<Usuario> usuarioListOrphanCheck = trabajador.getUsuarioList();
+            for (Usuario usuarioListOrphanCheckUsuario : usuarioListOrphanCheck) {
+                if (illegalOrphanMessages == null) {
+                    illegalOrphanMessages = new ArrayList<String>();
+                }
+                illegalOrphanMessages.add("This Trabajador (" + trabajador + ") cannot be destroyed since the Usuario " + usuarioListOrphanCheckUsuario + " in its usuarioList field has a non-nullable idTrabajador field.");
             }
             if (illegalOrphanMessages != null) {
                 throw new IllegalOrphanException(illegalOrphanMessages);
@@ -338,13 +336,13 @@ public class TrabajadorJpaController implements Serializable {
     }
     
     public List<Trabajador> buscarXAreas(Area idArea) {      
-        Query query = JpaUtil.getEntityManager().createNamedQuery("Trabajador.findByArea");
+        Query query = JpaUtil.getEntityManager().createQuery("SELECT t FROM Trabajador t WHERE t.idArea = :idArea");
         query.setParameter("idArea",idArea);
         return query.getResultList();
     }
     
     public List<Trabajador> buscarXResponsable(Area idArea) {      
-        Query query = JpaUtil.getEntityManager().createNamedQuery("Trabajador.findByResponsablexArea");
+        Query query = JpaUtil.getEntityManager().createQuery("SELECT t FROM Trabajador t WHERE t.idArea = :idArea and t.responsable = 1");
         query.setParameter("idArea",idArea);
         return query.getResultList();
     }

@@ -33,6 +33,7 @@ public class ProyectoJpaController implements Serializable {
         return JpaUtil.getEntityManager();
     }
 
+
     public void create(Proyecto proyecto) {
         if (proyecto.getOrdenCompraList() == null) {
             proyecto.setOrdenCompraList(new ArrayList<OrdenCompra>());
